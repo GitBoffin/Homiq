@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>Homiq Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0A0A;--bg2:#111;--bg3:#181818;--bg4:#222;--bg5:#2C2C2C;
+  --br:#242424;--br2:#2E2E2E;
+  --gold:#C49A52;--gold2:#DDB46A;--goldl:rgba(196,154,82,.1);--goldb:rgba(196,154,82,.25);
+  --green:#22C55E;--greenl:rgba(34,197,94,.08);--greenb:rgba(34,197,94,.25);
+  --red:#F05252;--redl:rgba(240,82,82,.08);--redb:rgba(240,82,82,.25);
+  --blue:#4F8EF7;--bluel:rgba(79,142,247,.08);--blueb:rgba(79,142,247,.25);
+  --amber:#F59E0B;--amberl:rgba(245,158,11,.08);--amberb:rgba(245,158,11,.25);
+  --ink:#EDEAE4;--ink2:#B0ACA6;--ink3:#706C68;--ink4:#454240;
+  --r:8px;--r2:12px;--r3:16px;--r4:20px;
+  --nav-w:230px;
+}
+html,body{height:100%;font-family:'Sora',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+button,input,select,textarea{font-family:'Sora',sans-serif;}
+button{cursor:pointer;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--br2);border-radius:2px;}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:2000;padding:20px;}
+.lc{width:100%;max-width:340px;}
+.lc-top{text-align:center;margin-bottom:28px;}
+.lc-logo{font-family:'DM Mono',monospace;font-size:26px;letter-spacing:3px;color:var(--gold);}
+.lc-sub{font-size:10px;color:var(--ink3);letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
+.lc-box{background:var(--bg2);border:1px solid var(--br2);border-radius:var(--r4);padding:28px 24px;}
+.lc-err{background:var(--redl);border:1px solid var(--redb);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--red);margin-bottom:14px;display:none;}
+.flbl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;display:block;}
+.finp{width:100%;background:var(--bg3);border:1px solid var(--br2);border-radius:var(--r);padding:11px 13px;font-size:13px;color:var(--ink);outline:none;transition:border .2s;margin-bottom:14px;}
+.finp:focus{border-color:var(--gold);}
+.lc-btn{width:100%;background:var(--gold);border:none;border-radius:var(--r);padding:12px;font-size:13px;font-weight:700;color:#fff;letter-spacing:.3px;transition:opacity .15s;}
+.lc-btn:hover{opacity:.9;}
+
+/* APP */
+#app{display:none;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--nav-w);background:var(--bg2);border-right:1px solid var(--br);display:flex;flex-direction:column;z-index:200;transition:transform .25s cubic-bezier(.4,0,.2,1);}
+.sb-head{padding:16px 14px 12px;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:10px;}
+.sb-mark{width:32px;height:32px;background:var(--goldl);border:1px solid var(--goldb);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sb-mark span{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);}
+.sb-name{font-size:12px;font-weight:700;color:var(--ink);}
+.sb-role{font-size:9px;color:var(--ink4);text-transform:uppercase;letter-spacing:1px;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 8px;}
+.sb-sec{font-size:9px;font-weight:600;color:var(--ink4);letter-spacing:1.5px;text-transform:uppercase;padding:10px 8px 3px;}
+.ni{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);font-size:12px;font-weight:500;color:var(--ink3);background:none;border:none;width:100%;text-align:left;transition:all .12s;margin-bottom:1px;position:relative;}
+.ni:hover{background:var(--bg3);color:var(--ink);}
+.ni.on{background:var(--goldl);color:var(--gold);font-weight:600;}
+.ni svg{width:14px;height:14px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.8;}
+.ni.on svg{opacity:1;}
+.ni-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;font-weight:700;}
+.sb-foot{padding:6px 8px;border-top:1px solid var(--br);}
+.sb-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:190;}
+
+/* MAIN */
+.main{margin-left:var(--nav-w);height:100vh;overflow-y:auto;background:var(--bg);}
+.mob-bar{display:none;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--bg2);border-bottom:1px solid var(--br);position:sticky;top:0;z-index:100;}
+.mob-menu{background:var(--bg3);border:1px solid var(--br2);border-radius:var(--r);padding:6px;display:flex;align-items:center;}
+.mob-menu svg{width:15px;height:15px;stroke:var(--ink2);fill:none;stroke-width:2;stroke-linecap:round;}
+.mob-logo{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:2px;}
+.pg{padding:20px 22px;max-width:1180px;}
+
+/* TOPBAR */
+.tb{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:10px;flex-wrap:wrap;}
+.tb-l .ttl{font-size:18px;font-weight:800;letter-spacing:-.3px;}
+.tb-l .sub{font-size:11px;color:var(--ink3);margin-top:2px;}
+.tb-r{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.sc{background:var(--bg2);border:1px solid var(--br);border-radius:var(--r2);padding:14px 16px;}
+.sc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.sc-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);}
+.sc-ico{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.sc-ico svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.sc-val{font-size:24px;font-weight:700;font-family:'DM Mono',monospace;line-height:1;}
+.sc-sub{font-size:10px;color:var(--ink4);margin-top:3px;}
+.ico-g{background:var(--goldl);color:var(--gold);}
+.ico-gr{background:var(--greenl);color:var(--green);}
+.ico-r{background:var(--redl);color:var(--red);}
+.ico-b{background:var(--bluel);color:var(--blue);}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--br);border-radius:var(--r2);overflow:hidden;margin-bottom:16px;}
+.ch{padding:12px 16px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;}
+.ch-t{font-size:12px;font-weight:700;}
+.cb{padding:14px 16px;}
+
+/* TABLE */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--bg3);padding:8px 12px;text-align:left;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);white-space:nowrap;}
+td{padding:9px 12px;border-top:1px solid var(--br);font-size:12px;vertical-align:middle;}
+tr:hover td{background:var(--bg3);}
+.mono{font-family:'DM Mono',monospace;font-size:11px;}
+
+/* BADGES */
+.bge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap;line-height:1.7;}
+.bge-g{background:var(--goldl);color:var(--gold);border:1px solid var(--goldb);}
+.bge-gr{background:var(--greenl);color:var(--green);border:1px solid var(--greenb);}
+.bge-r{background:var(--redl);color:var(--red);border:1px solid var(--redb);}
+.bge-b{background:var(--bluel);color:var(--blue);border:1px solid var(--blueb);}
+.bge-a{background:var(--amberl);color:var(--amber);border:1px solid var(--amberb);}
+.bge-gy{background:var(--bg4);color:var(--ink3);border:1px solid var(--br2);}
+
+/* ACTION BTNS */
+.ab{background:var(--bg4);border:1px solid var(--br2);border-radius:6px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--ink2);transition:all .12s;white-space:nowrap;}
+.ab:hover{border-color:var(--gold);color:var(--gold);}
+.ab-r{color:var(--red);}
+.ab-r:hover{background:var(--redl);border-color:var(--redb);}
+.ab-gr{color:var(--green);}
+.ab-gr:hover{background:var(--greenl);border-color:var(--greenb);}
+.ab-p{background:var(--goldl);border-color:var(--goldb);color:var(--gold);}
+.acts{display:flex;gap:4px;flex-wrap:wrap;}
+
+/* SEARCH */
+.sw{position:relative;}
+.sw svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:12px;height:12px;stroke:var(--ink3);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none;}
+.si{background:var(--bg3);border:1px solid var(--br2);border-radius:var(--r);padding:7px 10px 7px 28px;font-size:11px;color:var(--ink);outline:none;transition:border .2s;width:220px;}
+.si:focus{border-color:var(--gold);}
+.fsel{background:var(--bg3);border:1px solid var(--br2);border-radius:var(--r);padding:7px 10px;font-size:11px;color:var(--ink2);outline:none;}
+.btn-s{background:var(--bg3);border:1px solid var(--br2);border-radius:var(--r);padding:6px 12px;font-size:11px;font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:5px;transition:all .12s;}
+.btn-s:hover{border-color:var(--gold);color:var(--gold);}
+.btn-s svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--bg3);border-radius:var(--r);padding:3px;margin-bottom:14px;width:fit-content;}
+.tab{padding:6px 14px;border-radius:6px;font-size:11px;font-weight:600;color:var(--ink3);background:none;border:none;transition:all .12s;}
+.tab.on{background:var(--bg2);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.4);}
+
+/* MODAL */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:600;display:none;align-items:flex-end;justify-content:center;}
+.mov.on{display:flex;}
+.mbox{background:var(--bg2);border:1px solid var(--br2);border-radius:var(--r4) var(--r4) 0 0;width:100%;max-width:600px;max-height:92vh;display:flex;flex-direction:column;}
+.mhead{padding:16px 20px 12px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:5;border-radius:var(--r4) var(--r4) 0 0;}
+.mtitle{font-size:14px;font-weight:700;}
+.mx{background:var(--bg4);border:1px solid var(--br2);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ink3);}
+.mbody{padding:18px 20px;overflow-y:auto;flex:1;}
+.mfoot{padding:12px 20px;border-top:1px solid var(--br);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--bg2);}
+.mb_{padding:8px 18px;border-radius:var(--r);font-size:11px;font-weight:700;border:none;transition:opacity .12s;}
+.mb_:hover{opacity:.85;}
+.mb-p{background:var(--gold);color:#fff;}
+.mb-s{background:var(--bg4);color:var(--ink2);border:1px solid var(--br2);}
+.mb-d{background:var(--redl);color:var(--red);border:1px solid var(--redb);}
+
+/* MODAL FIELDS */
+.mf{margin-bottom:12px;}
+.ml_{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-bottom:4px;display:block;}
+.mi_{width:100%;background:var(--bg3);border:1px solid var(--br2);border-radius:var(--r);padding:9px 11px;font-size:12px;color:var(--ink);outline:none;}
+.mi_:focus{border-color:var(--gold);}
+
+/* INFO ROWS */
+.ir{display:flex;padding:7px 0;border-bottom:1px solid var(--br);}
+.ik{font-size:10px;color:var(--ink3);min-width:120px;flex-shrink:0;padding-top:1px;}
+.iv{font-size:12px;color:var(--ink);font-weight:500;flex:1;}
+.sec-lbl{font-size:9px;font-weight:700;color:var(--ink4);letter-spacing:2px;text-transform:uppercase;margin:14px 0 8px;}
+
+/* PROFILE HEADER */
+.ph{background:linear-gradient(135deg,var(--bg3),var(--goldl));border-radius:var(--r2);padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+.pav{width:48px;height:48px;border-radius:50%;background:var(--goldl);border:1.5px solid var(--goldb);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--gold);flex-shrink:0;overflow:hidden;}
+.pav img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.pn{font-size:15px;font-weight:800;}
+.pc{font-size:10px;color:var(--ink3);margin-top:2px;}
+.pbadges{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+
+/* MINI CARDS */
+.mc{background:var(--bg3);border:1px solid var(--br);border-radius:var(--r);padding:9px 11px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.mc-t{font-size:11px;font-weight:600;color:var(--ink);}
+.mc-s{font-size:9px;color:var(--ink3);margin-top:2px;}
+.mc-r{text-align:right;flex-shrink:0;}
+.mc-p{font-size:11px;font-weight:700;color:var(--green);font-family:'DM Mono',monospace;}
+.mc-d{font-size:9px;color:var(--ink4);margin-top:1px;}
+
+/* PAY ROW */
+.pr{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--br);gap:8px;}
+.pr-t{font-size:11px;font-weight:600;}
+.pr-ref{font-size:9px;color:var(--ink4);font-family:'DM Mono',monospace;}
+.pr-amt{font-size:12px;font-weight:700;color:var(--green);font-family:'DM Mono',monospace;flex-shrink:0;}
+
+/* ACTIVITY */
+.ai{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--br);}
+.ad{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.at{font-size:11px;color:var(--ink2);flex:1;line-height:1.5;}
+.ats{font-size:9px;color:var(--ink4);flex-shrink:0;margin-top:2px;}
+
+/* UTILS */
+.tg{color:var(--gold);}
+.tgr{color:var(--green);}
+.tr_{color:var(--red);}
+.td_{color:var(--ink4);}
+.tw_{font-weight:700;}
+.trunc{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;}
+.div{height:1px;background:var(--br);margin:12px 0;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.empty{text-align:center;padding:36px 20px;color:var(--ink3);}
+.empty svg{width:28px;height:28px;stroke:var(--ink4);fill:none;stroke-width:1.5;stroke-linecap:round;margin-bottom:10px;}
+.empty p{font-size:11px;}
+.loading{text-align:center;padding:40px;}
+.spin{width:18px;height:18px;border:2px solid var(--br2);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto 8px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ldot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TOAST */
+#toast{position:fixed;bottom:18px;right:18px;z-index:9999;display:none;}
+.ti{padding:10px 14px;border-radius:var(--r2);font-size:11px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+.ti-ok{background:var(--bg3);border:1px solid var(--greenb);color:var(--green);}
+.ti-er{background:var(--bg3);border:1px solid var(--redb);color:var(--red);}
+#toast.sh{display:block;animation:tf .18s ease;}
+@keyframes tf{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* RESPONSIVE */
+@media(max-width:800px){
+  :root{--nav-w:0px;}
+  .sidebar{transform:translateX(-100%);width:230px;}
+  .sidebar.open{transform:translateX(0);}
+  .sb-ov.sh{display:block;}
+  .main{margin-left:0;}
+  .mob-bar{display:flex;}
+  .pg{padding:14px 14px;}
+  .sg{grid-template-columns:1fr 1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .si{width:160px;}
+  .hm{display:none!important;}
+}
+@media(max-width:480px){
+  .sg{grid-template-columns:1fr 1fr;}
+  .sc-val{font-size:20px;}
+  .si{width:130px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lc">
+    <div class="lc-top">
+      <div class="lc-logo">HOMIQ</div>
+      <div class="lc-sub">Admin Control Panel</div>
+    </div>
+    <div class="lc-box">
+      <div class="lc-err" id="lc-err">Wrong password. Try again.</div>
+      <label class="flbl">Master Password</label>
+      <input class="finp" type="password" id="lc-pass" placeholder="Enter admin password" autocomplete="current-password"/>
+      <button class="lc-btn" onclick="doLogin()">Enter Dashboard →</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="sb-ov" id="sb-ov" onclick="closeSB()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sb-head">
+      <div class="sb-mark"><span>H</span></div>
+      <div><div class="sb-name">Homiq</div><div class="sb-role">Admin Panel</div></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Overview</div>
+      <button class="ni on" data-s="dashboard" onclick="go('dashboard')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard
+      </button>
+      <div class="sb-sec">Manage</div>
+      <button class="ni" data-s="users" onclick="go('users')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Users
+      </button>
+      <button class="ni" data-s="listings" onclick="go('listings')">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Rent Listings
+      </button>
+      <button class="ni" data-s="buysell" onclick="go('buysell')">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>Buy / Sell
+      </button>
+      <button class="ni" data-s="connect" onclick="go('connect')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>HomiqConnect
+        <span class="ni-badge" id="conn-badge" style="display:none">0</span>
+      </button>
+      <button class="ni" data-s="jobs" onclick="go('jobs')">
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>Jobs
+      </button>
+      <button class="ni" data-s="services" onclick="go('services')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>HomiqServices
+      </button>
+      <div class="sb-sec">Finance & Safety</div>
+      <button class="ni" data-s="notifications" onclick="go('notifications')">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifications
+      </button>
+      <button class="ni" data-s="payments" onclick="go('payments')">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments
+      </button>
+      <button class="ni" data-s="referrals" onclick="go('referrals')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Referrals
+        <span class="ni-badge" id="ref-badge" style="display:none">0</span>
+      </button>
+      <button class="ni" data-s="reports" onclick="go('reports')">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Reports
+        <span class="ni-badge" id="rep-badge" style="display:none">0</span>
+      </button>
+    </nav>
+    <div class="sb-foot">
+      <button class="ni" onclick="doLogout()" style="color:var(--red)">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
+      </button>
+    </div>
+  </div>
+
+  <div class="main" id="main">
+    <div class="mob-bar">
+      <button class="mob-menu" onclick="openSB()">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="mob-logo">HOMIQ</div>
+      <div class="ldot"></div>
+    </div>
+    <div class="pg" id="pg">
+      <div class="loading"><div class="spin"></div><div style="font-size:11px;color:var(--ink3)">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="mov" id="mov" onclick="if(event.target===this)cM()">
+  <div class="mbox">
+    <div class="mhead"><div class="mtitle" id="m-title">—</div><button class="mx" onclick="cM()">✕</button></div>
+    <div class="mbody" id="m-body"></div>
+    <div class="mfoot" id="m-foot"></div>
+  </div>
+</div>
+
+<div id="toast"><div class="ti" id="ti"></div></div>
+
+<script>
+// ══════════════════════════
+// CONFIG
+// ══════════════════════════
+const ADMIN_PW = 'Homiq@Admin2026';
+const SB_URL   = 'https://tnphauliwgvmswyuxpai.supabase.co';
+const SB_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRucGhhdWxpd2d2bXN3eXV4cGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzY3NzksImV4cCI6MjA4NzgxMjc3OX0.VHDRGyQANN8Ko9JScYpb1lLnzmwDunkVJXp2KHg1W-U';
+const SB_H     = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'};
+
+const STATES = [
+  {key:'ondo',   label:'Ondo State'},
+  {key:'oyo',    label:'Oyo State'},
+  {key:'kwara',  label:'Kwara State'},
+  {key:'kaduna', label:'Kaduna State'},
+  {key:'ogun',   label:'Ogun State'},
+];
+let _stateFilter = 'all'; // 'all' or state key
+
+// ══════════════════════════
+// DB
+// ══════════════════════════
+async function sbQ(method,table,query,body){
+  try{
+    const _h=Object.assign({},SB_H);
+    if(method==='GET'||method==='DELETE') delete _h['Prefer'];
+    const r=await fetch(SB_URL+'/rest/v1/'+table+(query||''),{method,headers:_h,body:body?JSON.stringify(body):undefined});
+    if(!r.ok){console.error('DB',method,table,r.status,await r.text());return null;}
+    if(method==='DELETE')return true;
+    const t=await r.text(); return t?JSON.parse(t):[];
+  }catch(e){console.error(e);return null;}
+}
+const DB={
+  get:(t,q)=>sbQ('GET',t,q),
+  ins:(t,d)=>sbQ('POST',t,'',d),
+  upd:(t,id,d)=>sbQ('PATCH',t,'?id=eq.'+id,d),
+  del:(t,id)=>sbQ('DELETE',t,'?id=eq.'+id),
+  delWhere:(t,q)=>sbQ('DELETE',t,q),
+};
+
+// ══════════════════════════
+// AUTH
+// ══════════════════════════
+function doLogin(){
+  const p=document.getElementById('lc-pass').value.trim();
+  const err=document.getElementById('lc-err');
+  if(p===ADMIN_PW){
+    sessionStorage.setItem('hqa','1');
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    loadAll().then(()=>go('dashboard'));
+  } else {
+    err.style.display='block';
+    document.getElementById('lc-pass').value='';
+  }
+}
+function doLogout(){sessionStorage.removeItem('hqa');location.reload();}
+document.getElementById('lc-pass').onkeydown=e=>{if(e.key==='Enter')doLogin();};
+if(sessionStorage.getItem('hqa')==='1'){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  loadAll().then(()=>go('dashboard'));
+}
+
+// ══════════════════════════
+// SIDEBAR
+// ══════════════════════════
+function openSB(){document.getElementById('sidebar').classList.add('open');document.getElementById('sb-ov').classList.add('sh');}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-ov').classList.remove('sh');}
+
+// ══════════════════════════
+// STATE FILTER BAR (rendered top of every page)
+// ══════════════════════════
+function stateBar(){
+  return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+    <span style="font-size:9px;font-weight:700;color:var(--ink4);letter-spacing:1.5px;text-transform:uppercase;margin-right:4px">STATE</span>
+    ${[{key:'all',label:'All States'},...STATES].map(s=>`
+      <button onclick="_stateFilter='${s.key}';go(_cur)" style="padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;border:1px solid ${_stateFilter===s.key?'var(--gold)':'var(--br2)'};background:${_stateFilter===s.key?'var(--goldl)':'var(--bg3)'};color:${_stateFilter===s.key?'var(--gold)':'var(--ink3)'};cursor:pointer;transition:all .12s">${s.label}</button>
+    `).join('')}
+  </div>`;
+}
+function filterByState(arr){
+  if(_stateFilter==='all') return arr;
+  return arr.filter(x=>{
+    const st=(x.state||x.city_state||'').toLowerCase();
+    const city=(x.city||'').toLowerCase();
+    // Match by state field or city field that maps to state
+    return st===_stateFilter || city===_stateFilter || (x.city&&_cityStateMap[x.city]===_stateFilter);
+  });
+}
+// Map city keys to state keys (covers both old Ondo-only and new multi-state)
+const _cityStateMap = {
+  // Ondo
+  akure:'ondo',owo:'ondo',akungba:'ondo','ikare-akoko':'ondo',ondo:'ondo',oke_ado:'ondo',idanre:'ondo',okitipupa:'ondo',ore:'ondo',
+  // Oyo
+  ibadan:'oyo',oyo:'oyo',ogbomosho:'oyo',iseyin:'oyo',
+  // Kwara
+  ilorin:'kwara',offa:'kwara',omu_aran:'kwara',
+  // Kaduna
+  kaduna:'kaduna',zaria:'kaduna',kafanchan:'kaduna',
+  // Ogun
+  abeokuta:'ogun',sagamu:'ogun',ijebu_ode:'ogun',ota:'ogun',ilaro:'ogun',
+};
+
+// ══════════════════════════
+// DATA
+// ══════════════════════════
+let D={
+  users:[],
+  listings:[],
+  // Buy/Sell split into 3 tables
+  bs_appliances:[], bs_houses:[], bs_land:[],
+  // Connect split into 3 tables
+  cn_roommate:[], cn_shortlet:[], cn_share:[],
+  // Jobs & Services split
+  jobs:[], services:[],
+  payments:[], reports:[], referrals:[],
+  notifications:[]
+};
+
+async function loadAll(){
+  setP('<div class="loading"><div class="spin"></div><div style="font-size:11px;color:var(--ink3);margin-top:6px">Loading all data from Homiq…</div></div>');
+  // Fetch all in parallel — bs_listing uses cat field, tenant_connect uses type field, job_listing uses type field
+  const [u,l,bs,cn,jl,svc,p,r,ref,notif] = await Promise.all([
+    DB.get('user',                '?order=created_at.desc&limit=3000'),
+    DB.get('listing',             '?order=created_at.desc&limit=3000'),
+    DB.get('bs_listing',          '?order=created_at.desc&limit=3000'),
+    DB.get('tenant_connect',      '?order=created_at.desc&limit=3000'),
+    DB.get('job_listing',         '?type=eq.job&order=created_at.desc&limit=3000'),
+    DB.get('svc_listing',         '?order=created_at.desc&limit=3000'),
+    DB.get('payment',             '?order=created_at.desc&limit=3000'),
+    DB.get('report',              '?order=created_at.desc&limit=2000'),
+    DB.get('referral_earning',    '?order=created_at.desc&limit=3000'),
+    DB.get('notifications',       '?order=created_at.desc&limit=500'),
+  ]);
+
+  D.users    = Array.isArray(u)?u:[];
+  D.listings = Array.isArray(l)?l:[];
+
+  // Split bs_listing by cat field
+  const bsAll = Array.isArray(bs)?bs:[];
+  D.bs_appliances = bsAll.filter(x=>!x.cat||x.cat==='appliances'||x.cat==='appliance');
+  D.bs_houses     = bsAll.filter(x=>x.cat==='house'||x.cat==='house_for_sale');
+  D.bs_land       = bsAll.filter(x=>x.cat==='land');
+
+  // Split tenant_connect by type field
+  const cnAll = Array.isArray(cn)?cn:[];
+  D.cn_roommate = cnAll.filter(x=>x.type==='roommate'||!x.type);
+  D.cn_shortlet = cnAll.filter(x=>x.type==='shortlet');
+  D.cn_share    = cnAll.filter(x=>x.type==='share');
+
+  D.jobs     = Array.isArray(jl)?jl:[];
+  D.services = Array.isArray(svc)?svc:[];
+
+  D.payments      = Array.isArray(p)?p:[];
+  D.reports       = Array.isArray(r)?r:[];
+  D.referrals     = Array.isArray(ref)?ref:[];
+  D.notifications = Array.isArray(notif)?notif:[];
+
+  refreshBadge();
+  toast('Loaded — '+D.users.length+' users','ok');
+}
+
+// ══════════════════════════
+// NAV
+// ══════════════════════════
+let _cur='dashboard';
+function go(name){
+  _cur=name;
+  document.querySelectorAll('.ni[data-s]').forEach(b=>b.classList.toggle('on',b.dataset.s===name));
+  closeSB();
+  const fns={dashboard:rDash,users:rUsers,listings:rListings,buysell:rBuySell,connect:rConnect,jobs:rJobs,services:rServices,notifications:rNotifications,payments:rPayments,reports:rReports,referrals:rReferrals};
+  if(fns[name]) fns[name]();
+}
+
+// ══════════════════════════
+// HELPERS
+// ══════════════════════════
+function setP(h){document.getElementById('pg').innerHTML=h;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmt(n){return '₦'+Number(n||0).toLocaleString();}
+function ago(iso){
+  if(!iso)return '—';
+  const s=(Date.now()-new Date(iso))/1000;
+  if(s<60)return 'Just now';
+  if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';
+  if(s<604800)return Math.floor(s/86400)+'d ago';
+  return ds(iso);
+}
+function ds(iso){if(!iso)return '—';return new Date(iso).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast'),ti=document.getElementById('ti');
+  ti.textContent=msg; ti.className='ti ti-'+(type==='ok'?'ok':'er');
+  el.className='sh'; clearTimeout(el._t); el._t=setTimeout(()=>el.className='',3200);
+}
+function oM(title,body,foot=''){
+  document.getElementById('m-title').textContent=title;
+  document.getElementById('m-body').innerHTML=body;
+  document.getElementById('m-foot').innerHTML=foot;
+  document.getElementById('mov').classList.add('on');
+}
+function cM(){document.getElementById('mov').classList.remove('on');}
+function uBadges(u){
+  let b='';
+  if(u.is_agent)        b+='<span class="bge bge-g">✦ Agent</span> ';
+  if(u.store_type)      b+='<span class="bge bge-b">■ '+(u.store_type==='gadget'?'Gadget':'Electronics')+'</span> ';
+  if(u.has_svc_listing) b+='<span class="bge bge-a">✦ Pro</span> ';
+  if(u.shortlet_pro)    b+='<span class="bge bge-gr">★ Shortlet Pro</span> ';
+  if(!b)                b='<span class="bge bge-gy">'+(u.role||'tenant')+'</span>';
+  return b;
+}
+function lStatus(l,t){
+  if(t==='listing'){
+    if(l.is_rented) return '<span class="bge bge-gy">Rented</span>';
+    if(l.expires_at&&new Date(l.expires_at)<new Date()) return '<span class="bge bge-r">Expired</span>';
+    if(l.is_top)    return '<span class="bge bge-g">Boosted</span>';
+    return '<span class="bge bge-gr">Active</span>';
+  }
+  if(t==='bs'){
+    if(l.expires_at&&new Date(l.expires_at)<new Date()) return '<span class="bge bge-r">Expired</span>';
+    if(l.is_featured) return '<span class="bge bge-g">Featured</span>';
+    return '<span class="bge bge-gr">Active</span>';
+  }
+  if(t==='job'){
+    if(l.is_top) return '<span class="bge bge-g">Boosted</span>';
+    return '<span class="bge bge-gr">Active</span>';
+  }
+  if(t==='svc'){
+    if(l.is_pro) return '<span class="bge bge-a">Verified Pro</span>';
+    return '<span class="bge bge-gr">Active</span>';
+  }
+  if(t==='connect'){
+    if(l.is_expired||l.is_rented) return '<span class="bge bge-gy">Closed</span>';
+    return '<span class="bge bge-gr">Active</span>';
+  }
+  return '<span class="bge bge-gy">—</span>';
+}
+function refreshBadge(){
+  const open=D.reports.filter(x=>!x.resolved).length;
+  const b=document.getElementById('rep-badge');
+  if(b){b.textContent=open; b.style.display=open?'inline':'none';}
+  const pendingRedeem=D.users.filter(u=>(u.referral_earnings||0)>=3000).length;
+  const rb=document.getElementById('ref-badge');
+  if(rb){rb.textContent=pendingRedeem; rb.style.display=pendingRedeem?'inline':'none';}
+  const allCn=[...D.cn_roommate,...D.cn_shortlet,...D.cn_share];
+  const connOpen=allCn.filter(x=>!x.is_expired&&!x.is_rented).length;
+  const cb=document.getElementById('conn-badge');
+  if(cb){cb.textContent=connOpen; cb.style.display=connOpen?'inline':'none';}
+}
+
+// ══════════════════════════
+// DASHBOARD
+// ══════════════════════════
+function rDash(){
+  const rev=D.payments.reduce((s,p)=>s+(p.amount||0),0)/100;
+  const today=D.users.filter(u=>(Date.now()-new Date(u.created_at||0))<86400000).length;
+  const openR=D.reports.filter(r=>!r.resolved).length;
+  const bsAll=[...D.bs_appliances,...D.bs_houses,...D.bs_land];
+  const cnAll=[...D.cn_roommate,...D.cn_shortlet,...D.cn_share];
+  const allL=D.listings.length+bsAll.length+D.jobs.length+D.services.length+cnAll.length;
+  const ru=D.users.slice(0,7);
+  const rp=D.payments.slice(0,8);
+  const activeRent=D.listings.filter(l=>!l.is_rented&&!(l.expires_at&&new Date(l.expires_at)<new Date())).length;
+
+  // State breakdown
+  const stateCounts=STATES.map(s=>{
+    const cnt=filterByStateKey(D.listings,s.key).length
+      +filterByStateKey(bsAll,s.key).length
+      +filterByStateKey(D.jobs,s.key).length
+      +filterByStateKey(cnAll,s.key).length;
+    return {label:s.label.replace(' State',''),cnt};
+  });
+
+  setP(`
+  <div class="tb">
+    <div class="tb-l"><div class="ttl">Dashboard</div><div class="sub">Live overview · ${STATES.length} states</div></div>
+    <div class="tb-r">
+      <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ink3)"><div class="ldot"></div>Live</div>
+      <button class="btn-s" onclick="loadAll().then(()=>go(_cur))">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Refresh
+      </button>
+    </div>
+  </div>
+
+  <div class="sg">
+    <div class="sc">
+      <div class="sc-top"><span class="sc-lbl">Users</span><div class="sc-ico ico-b"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div></div>
+      <div class="sc-val">${D.users.length}</div><div class="sc-sub">+${today} today</div>
+    </div>
+    <div class="sc">
+      <div class="sc-top"><span class="sc-lbl">Revenue</span><div class="sc-ico ico-gr"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div></div>
+      <div class="sc-val tgr">${fmt(rev)}</div><div class="sc-sub">${D.payments.length} payments</div>
+    </div>
+    <div class="sc">
+      <div class="sc-top"><span class="sc-lbl">All Listings</span><div class="sc-ico ico-g"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div></div>
+      <div class="sc-val">${allL}</div><div class="sc-sub">Across all sections</div>
+    </div>
+    <div class="sc">
+      <div class="sc-top"><span class="sc-lbl">Reports</span><div class="sc-ico ico-r"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div></div>
+      <div class="sc-val ${openR>0?'tr_':''}">${openR}</div><div class="sc-sub">open reports</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="ch"><div class="ch-t">Platform Breakdown</div></div>
+      <div class="cb">
+        ${[
+          ['Rent Listings (Total)',D.listings.length,'bge-gr'],
+          ['Rent Listings (Active)',activeRent,'bge-gr'],
+          ['Buy/Sell — Appliances',D.bs_appliances.length,'bge-b'],
+          ['Buy/Sell — Houses',D.bs_houses.length,'bge-b'],
+          ['Buy/Sell — Land',D.bs_land.length,'bge-b'],
+          ['Connect — Roommate',D.cn_roommate.length,'bge-g'],
+          ['Connect — Shortlet',D.cn_shortlet.length,'bge-a'],
+          ['Connect — Space Share',D.cn_share.length,'bge-gy'],
+          ['Jobs',D.jobs.length,'bge-gr'],
+          ['HomiqServices (Gigs)',D.services.length,'bge-a'],
+          ['Verified Agents',D.users.filter(u=>u.is_agent).length,'bge-g'],
+          ['Verified Stores',D.users.filter(u=>u.store_type).length,'bge-b'],
+        ].map(([k,v,c])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--br)"><span style="font-size:11px;color:var(--ink2)">${k}</span><span class="bge ${c}">${v}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ch-t">By State</div></div>
+      <div class="cb">
+        ${stateCounts.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--br)">
+          <span style="font-size:11px;color:var(--ink2)">${s.label}</span>
+          <span class="bge bge-gr">${s.cnt} listings</span>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ch-t">Recent Signups</div></div>
+    <div class="cb">
+      ${ru.length?ru.map(u=>`<div class="ai"><div class="ad" style="background:var(--blue)"></div><div class="at"><strong>${esc(u.nick||'—')}</strong> · ${u.phone?'+234'+u.phone:u.email||'no contact'}</div><div class="ats">${ago(u.created_at)}</div></div>`).join(''):'<div class="td_" style="font-size:11px">No users yet</div>'}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ch-t">Recent Payments</div><button class="btn-s" onclick="go('payments')">View all</button></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>User</th><th>Type</th><th>Amount</th><th class="hm">Reference</th><th class="hm">Date</th></tr></thead>
+        <tbody>
+          ${rp.length===0?'<tr><td colspan="5"><div class="empty"><p>No payments yet</p></div></td></tr>':''}
+          ${rp.map(p=>{const u=D.users.find(x=>x.id===p.user_id);return`<tr>
+            <td class="tw_">${esc(u?u.nick||'+234'+(u.phone||''):'Unknown')}</td>
+            <td><span class="bge bge-g">${esc((p.type||'—').replace(/_/g,' '))}</span></td>
+            <td class="tgr mono">${fmt((p.amount||0)/100)}</td>
+            <td class="mono td_ hm trunc">${esc((p.ref||'—').substring(0,22))}</td>
+            <td class="td_ hm">${ds(p.created_at)}</td>
+          </tr>`;}).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`);
+}
+
+// helper — filter array by state key matching city or state field
+function filterByStateKey(arr, stateKey){
+  if(stateKey==='all') return arr;
+  return arr.filter(x=>{
+    const st=(x.state||x.city_state||'').toLowerCase();
+    const city=(x.city||'').toLowerCase();
+    return st===stateKey || city===stateKey || (x.city&&_cityStateMap[x.city]===stateKey);
+  });
+}
+
+// ══════════════════════════
+// USERS
+// ══════════════════════════
+function rUsers(q='',rf='all'){
+  const s=q.toLowerCase().trim();
+  let data=D.users.filter(u=>{
+    if(rf==='agent'&&!u.is_agent)return false;
+    if(rf==='store'&&!u.store_type)return false;
+    if(rf==='pro'&&!u.has_svc_listing)return false;
+    if(rf==='referrer'&&!(u.referral_count>0))return false;
+    if(!s)return true;
+    return (u.nick||'').toLowerCase().includes(s)||(u.phone||'').includes(s)||(u.email||'').toLowerCase().includes(s)||(u.id||'').includes(s);
+  });
+  setP(`
+  ${stateBar()}
+  <div class="tb">
+    <div class="tb-l"><div class="ttl">Users</div><div class="sub">${data.length} of ${D.users.length} users</div></div>
+    <div class="tb-r">
+      <div class="sw">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="si" id="u-s" placeholder="Name · phone · email…" value="${esc(q)}" oninput="rUsers(this.value,document.getElementById('u-rf').value)"/>
+      </div>
+      <select class="fsel" id="u-rf" onchange="rUsers(document.getElementById('u-s').value,this.value)">
+        <option value="all">All Users</option>
+        <option value="agent" ${rf==='agent'?'selected':''}>Agents Only</option>
+        <option value="store" ${rf==='store'?'selected':''}>Stores Only</option>
+        <option value="pro"   ${rf==='pro'?'selected':''}>Pro Only</option>
+        <option value="referrer" ${rf==='referrer'?'selected':''}>Has Referrals</option>
+      </select>
+      <button class="btn-s" onclick="loadAll().then(()=>rUsers())"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></button>
+    </div>
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>User</th><th>Phone / Email</th><th>Badge</th><th class="hm">Posts</th><th class="hm">Joined</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${data.length===0?'<tr><td colspan="6"><div class="empty"><p>No users found</p></div></td></tr>':''}
+      ${data.map(u=>`<tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--goldl);border:1px solid var(--goldb);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gold);flex-shrink:0;overflow:hidden">
+              ${u.pfp?`<img src="${esc(u.pfp)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(u.nick||'?').charAt(0).toUpperCase()}
+            </div>
+            <div><div style="font-weight:600;font-size:12px">${esc(u.nick||'—')}</div><div class="mono td_" style="font-size:9px">${u.id.substring(0,12)}…</div></div>
+          </div>
+        </td>
+        <td><div style="font-size:11px">${u.phone?'+234'+u.phone:'—'}</div><div class="td_" style="font-size:10px">${esc(u.email||'')}</div></td>
+        <td>${uBadges(u)}</td>
+        <td class="mono hm">${u.total_posts||0}</td>
+        <td class="td_ hm">${ds(u.created_at)}</td>
+        <td><div class="acts">
+          <button class="ab ab-p" onclick="openUser('${u.id}')">View</button>
+          <button class="ab ab-gr" onclick="badgeModal('${u.id}')">Badge</button>
+          <button class="ab ab-r" onclick="delUser('${u.id}','${esc(u.nick||u.phone||'user')}')">Del</button>
+        </div></td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div></div>`);
+}
+
+function openUser(uid){
+  const u=D.users.find(x=>x.id===uid); if(!u){toast('Not found','err');return;}
+  const bsAll=[...D.bs_appliances,...D.bs_houses,...D.bs_land];
+  const cnAll=[...D.cn_roommate,...D.cn_shortlet,...D.cn_share];
+  const uL=D.listings.filter(l=>l.poster_id===uid);
+  const uBS=bsAll.filter(l=>l.poster_id===uid);
+  const uJ=D.jobs.filter(l=>l.poster_id===uid);
+  const uS=D.services.filter(l=>l.poster_id===uid||l.user_id===uid);
+  const uCN=cnAll.filter(l=>l.poster_id===uid);
+  const uP=D.payments.filter(p=>p.user_id===uid);
+  const uR=D.reports.filter(r=>r.reporter_id===uid);
+  const spent=uP.reduce((s,p)=>s+(p.amount||0),0)/100;
+  const av=u.pfp?`<img src="${esc(u.pfp)}">`:(u.nick||'?').charAt(0).toUpperCase();
+  oM('User Profile',`
+    <div class="ph"><div class="pav">${av}</div>
+      <div><div class="pn">${esc(u.nick||'—')}</div>
+        <div class="pc">${u.phone?'+234'+u.phone:''}${u.email?' · '+esc(u.email):''}</div>
+        <div class="pbadges">${uBadges(u)}</div>
+      </div>
+    </div>
+    <div class="sec-lbl">Account Info</div>
+    <div class="ir"><span class="ik">User ID</span><span class="iv mono td_" style="font-size:10px;word-break:break-all">${u.id}</span></div>
+    <div class="ir"><span class="ik">Phone</span><span class="iv">${u.phone?'+234'+u.phone:'—'}</span></div>
+    <div class="ir"><span class="ik">Email</span><span class="iv">${esc(u.email||'—')}</span></div>
+    <div class="ir"><span class="ik">Role</span><span class="iv">${u.role||'tenant'}</span></div>
+    ${u.referral_count>0||u.referral_earnings>0?`
+    <div class="ir"><span class="ik">Ref Balance</span><span class="iv tgr">${fmt(u.referral_earnings||0)}</span></div>
+    <div class="ir"><span class="ik">Ref Count</span><span class="iv">${u.referral_count||0} agent referrals</span></div>
+    <div class="ir"><span class="ik">Ref Code</span><span class="iv mono tg">${(u.referral_code||u.id.slice(0,8)).toUpperCase()}</span></div>`:''}
+    <div class="ir"><span class="ik">Total Posts</span><span class="iv">${u.total_posts||0}</span></div>
+    <div class="ir"><span class="ik">Joined</span><span class="iv">${ds(u.created_at)}</span></div>
+    <div class="sec-lbl">Subscriptions</div>
+    <div class="ir"><span class="ik">Verified Agent</span><span class="iv ${u.is_agent?'tgr':'td_'}">${u.is_agent?'Active — expires '+ds(u.agent_expires):'Not active'}</span></div>
+    <div class="ir"><span class="ik">Verified Store</span><span class="iv ${u.store_type?'tgr':'td_'}">${u.store_type?u.store_type+' — expires '+ds(u.store_expires):'Not active'}</span></div>
+    <div class="ir"><span class="ik">Verified Pro</span><span class="iv ${u.has_svc_listing?'tgr':'td_'}">${u.has_svc_listing?'Active':'Not active'}</span></div>
+    <div class="sec-lbl">Payments (${uP.length}) — Spent: <span class="tgr">${fmt(spent)}</span></div>
+    ${uP.length===0?'<div class="td_" style="font-size:11px;padding:6px 0">No payments</div>':uP.map(p=>`<div class="pr"><div><div class="pr-t">${esc((p.type||'—').replace(/_/g,' '))}</div><div class="pr-ref">${esc((p.ref||'—').substring(0,28))}</div></div><div style="text-align:right"><div class="pr-amt">${fmt((p.amount||0)/100)}</div><div class="td_" style="font-size:9px">${ds(p.created_at)}</div></div></div>`).join('')}
+    <div class="sec-lbl">Rent (${uL.length}) · Buy/Sell (${uBS.length}) · Connect (${uCN.length}) · Jobs (${uJ.length}) · Services (${uS.length})</div>
+    ${[...uL.map(l=>`<div class="mc"><div><div class="mc-t">${esc(l.area||'—')} · ${esc(l.house_type||'')}</div><div class="mc-s">${lStatus(l,'listing')}</div></div><div class="mc-r"><div class="mc-p">${l.rent?fmt(l.rent):''}</div><div class="mc-d">${ago(l.created_at)}</div><button class="ab ab-r" style="margin-top:4px;font-size:9px;padding:2px 7px" onclick="delListing('${l.id}','listing');cM()">Del</button></div></div>`),
+      ...uBS.map(l=>`<div class="mc"><div><div class="mc-t">${esc(l.title||'—')}</div><div class="mc-s">${esc(l.cat||'')} ${lStatus(l,'bs')}</div></div><div class="mc-r"><div class="mc-p">${l.price?fmt(l.price):''}</div><div class="mc-d">${ago(l.created_at)}</div><button class="ab ab-r" style="margin-top:4px;font-size:9px;padding:2px 7px" onclick="delListing('${l.id}','bs_listing');cM()">Del</button></div></div>`),
+      ...uCN.map(l=>`<div class="mc"><div><div class="mc-t">${esc(l.title||'—')}</div><div class="mc-s">${esc(l.type||'connect')} ${lStatus(l,'connect')}</div></div><div class="mc-r"><div class="mc-d">${ago(l.created_at)}</div><button class="ab ab-r" style="margin-top:4px;font-size:9px;padding:2px 7px" onclick="delConnectPost('${l.id}');cM()">Del</button></div></div>`),
+      ...uJ.map(j=>`<div class="mc"><div><div class="mc-t">${esc(j.title||'—')}</div><div class="mc-s">Job ${lStatus(j,'job')}</div></div><div class="mc-r"><div class="mc-d">${ago(j.created_at)}</div><button class="ab ab-r" style="margin-top:4px;font-size:9px;padding:2px 7px" onclick="delListing('${j.id}','job_listing');cM()">Del</button></div></div>`),
+      ...uS.map(s=>`<div class="mc"><div><div class="mc-t">${esc(s.title||s.cat||'—')}</div><div class="mc-s">Gig ${lStatus(s,'svc')}</div></div><div class="mc-r"><div class="mc-d">${ago(s.created_at)}</div><button class="ab ab-r" style="margin-top:4px;font-size:9px;padding:2px 7px" onclick="delSvc('${s.id}');cM()">Del</button></div></div>`)
+    ].join('')||'<div class="td_" style="font-size:11px">No listings</div>'}
+    <div class="sec-lbl">Reports Filed (${uR.length})</div>
+    <div class="td_" style="font-size:11px;padding:4px 0">${uR.length===0?'None.':uR.length+' report(s) filed.'}</div>
+  `,`<button class="mb_ mb-s" onclick="badgeModal('${uid}')">Give Badge</button>
+     <button class="mb_ mb-p" onclick="fixPayModal('${uid}',null,null,null)">Fix Payment</button>
+     <button class="mb_ mb-d" onclick="delUser('${uid}','${esc(u.nick||'user')}');cM()">Delete User</button>`);
+}
+function badgeModal(uid){
+  const u=D.users.find(x=>x.id===uid); if(!u)return;
+  oM('Give Badge — '+esc(u.nick||u.phone||'User'),`
+    <p style="font-size:11px;color:var(--ink2);margin-bottom:14px;line-height:1.6">Grant any badge for free. Takes effect immediately.</p>
+    <div style="background:var(--bg3);border-radius:var(--r);padding:9px 12px;margin-bottom:12px;font-size:10px;color:var(--ink3)">Current: ${uBadges(u)}</div>
+    <div class="mf"><label class="ml_">Badge Type</label>
+      <select class="mi_" id="b-sel">
+        <option value="agent">✦ Verified Agent (30 days)</option>
+        <option value="store_gadget">■ Verified Store — Gadget (30 days)</option>
+        <option value="store_electronics">■ Verified Store — Electronics (30 days)</option>
+        <option value="pro">✦ Verified Pro (30 days)</option>
+        <option value="shortlet_pro">★ Shortlet Pro (30 days)</option>
+        <option value="boost_listing">⚡ Boost Latest Rent Listing (48h)</option>
+        <option value="remove">✕ Remove all badges</option>
+      </select>
+    </div>`,
+  `<button class="mb_ mb-s" onclick="cM()">Cancel</button>
+   <button class="mb_ mb-p" onclick="applyBadge('${uid}')">Apply Now</button>`);
+}
+async function applyBadge(uid){
+  const sel=document.getElementById('b-sel'); if(!sel)return;
+  const t=sel.value, u=D.users.find(x=>x.id===uid); if(!u)return;
+  const e30=new Date(Date.now()+30*24*3600000).toISOString();
+  const e48=new Date(Date.now()+48*3600000).toISOString();
+  let upd={};
+  if(t==='agent') upd={is_agent:true,role:'agent',agent_expires:e30};
+  else if(t==='store_gadget') upd={store_type:'gadget',store_expires:e30};
+  else if(t==='store_electronics') upd={store_type:'electronics',store_expires:e30};
+  else if(t==='pro') upd={has_svc_listing:true,svc_expires:e30};
+  else if(t==='shortlet_pro') upd={shortlet_pro:true,shortlet_pro_expires:e30};
+  else if(t==='boost_listing'){
+    const li=D.listings.find(x=>x.poster_id===uid&&!x.is_top);
+    if(li){const br=await DB.upd('listing',li.id,{is_top:true,boost_expires:e48});if(br){li.is_top=true;toast('⚡ Listing boosted','ok');cM();rUsers();}else toast('Failed','err');}
+    else toast('No unboosted listing found','err');
+    return;
+  }
+  else if(t==='remove') upd={is_agent:false,agent_expires:null,store_type:null,store_expires:null,has_svc_listing:false,shortlet_pro:false,shortlet_pro_expires:null};
+  if(!Object.keys(upd).length)return;
+  const r=await DB.upd('user',uid,upd);
+  if(r){Object.assign(u,upd);toast('✓ Badge applied','ok');cM();rUsers();}
+  else toast('Failed — check Supabase RLS','err');
+}
+async function delUser(uid,name){
+  if(!confirm('Delete user "'+name+'"? Cannot be undone.'))return;
+  await DB.del('user',uid);
+  D.users=D.users.filter(x=>x.id!==uid);
+  toast('User deleted','ok'); rUsers();
+}
+
+// ══════════════════════════
+// RENT LISTINGS
+// ══════════════════════════
+let _listingsShowExpired=false;
+function rListings(q=''){
+  const s=q.toLowerCase();
+  let data=filterByState(D.listings).filter(l=>{
+    if(!_listingsShowExpired&&(l.is_rented||(l.expires_at&&new Date(l.expires_at)<new Date()))) return false;
+    if(!s) return true;
+    return (l.area||'').toLowerCase().includes(s)||(l.house_type||'').toLowerCase().includes(s)||(l.street||'').toLowerCase().includes(s);
+  });
+  const total=filterByState(D.listings).length;
+  const active=filterByState(D.listings).filter(l=>!l.is_rented&&!(l.expires_at&&new Date(l.expires_at)<new Date())).length;
+  const rented=filterByState(D.listings).filter(l=>l.is_rented).length;
+  const expired=filterByState(D.listings).filter(l=>!l.is_rented&&l.expires_at&&new Date(l.expires_at)<new Date()).length;
+
+  setP(`
+  ${stateBar()}
+  <div class="tb">
+    <div class="tb-l">
+      <div class="ttl">Rent Listings</div>
+      <div class="sub">${active} active · ${rented} rented · ${expired} expired · ${total} total</div>
+    </div>
+    <div class="tb-r">
+      <div class="sw"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="si" placeholder="Area, type, street…" value="${esc(q)}" oninput="rListings(this.value)"/>
+      </div>
+      <button class="btn-s" onclick="_listingsShowExpired=!_listingsShowExpired;rListings('${esc(q)}')" style="${_listingsShowExpired?'border-color:var(--gold);color:var(--gold)':''}">
+        ${_listingsShowExpired?'Hide Expired':'Show Expired'}
+      </button>
+      <button class="btn-s" onclick="loadAll().then(()=>rListings())"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></button>
+    </div>
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Area / Type</th><th class="hm">State</th><th>Rent</th><th class="hm">By</th><th>Status</th><th>Reports</th><th class="hm">Date</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${data.length===0?'<tr><td colspan="8"><div class="empty"><p>No listings</p></div></td></tr>':''}
+      ${data.map(l=>{
+        const pr=D.users.find(u=>u.id===l.poster_id), rc=l.report_count||0;
+        const state=l.state||_cityStateMap[l.city]||'—';
+        return `<tr>
+          <td><div class="tw_">${esc(l.area||'—')}</div><div class="td_" style="font-size:10px">${esc(l.house_type||'')} ${l.street?'· '+esc(l.street):''}</div></td>
+          <td class="hm"><span class="bge bge-gy">${esc(state)}</span></td>
+          <td class="tgr mono">${l.rent?fmt(l.rent):'—'}</td>
+          <td class="hm">${esc(pr?pr.nick||'+234'+(pr.phone||''):'Unknown')}</td>
+          <td>${lStatus(l,'listing')}</td>
+          <td>${rc>0?`<span class="bge ${rc>=5?'bge-r':'bge-a'}">${rc}</span>`:'<span class="td_">0</span>'}</td>
+          <td class="td_ hm">${ago(l.created_at)}</td>
+          <td><div class="acts">
+            <button class="ab ab-p" onclick="viewListing('${l.id}','listing')">View</button>
+            ${!l.is_top?`<button class="ab ab-gr" onclick="boostItem('${l.id}','listing')">Boost</button>`:''}
+            <button class="ab ab-r" onclick="delListing('${l.id}','listing')">Del</button>
+          </div></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div></div>`);
+}
+
+// ══════════════════════════
+// BUY / SELL — 3 separate tables
+// ══════════════════════════
+let _bsTab='appliances';
+function rBuySell(q=''){
+  const s=q.toLowerCase();
+  const appl=filterByState(D.bs_appliances).filter(l=>!s||(l.title||'').toLowerCase().includes(s)||(l.area||'').toLowerCase().includes(s));
+  const houses=filterByState(D.bs_houses).filter(l=>!s||(l.title||'').toLowerCase().includes(s)||(l.area||'').toLowerCase().includes(s));
+  const land=filterByState(D.bs_land).filter(l=>!s||(l.title||'').toLowerCase().includes(s)||(l.area||'').toLowerCase().includes(s));
+  const map={appliances:appl,house:houses,land};
+  const data=map[_bsTab]||appl;
+
+  setP(`
+  ${stateBar()}
+  <div class="tb">
+    <div class="tb-l"><div class="ttl">Buy / Sell</div><div class="sub">${appl.length} appliances · ${houses.length} houses · ${land.length} land</div></div>
+    <div class="tb-r">
+      <div class="sw"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="si" placeholder="Title, area…" value="${esc(q)}" oninput="rBuySell(this.value)"/>
+      </div>
+      <button class="btn-s" onclick="loadAll().then(()=>rBuySell())"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab ${_bsTab==='appliances'?'on':''}" onclick="_bsTab='appliances';rBuySell('${esc(q)}')">📦 Appliances (${appl.length})</button>
+    <button class="tab ${_bsTab==='house'?'on':''}" onclick="_bsTab='house';rBuySell('${esc(q)}')">🏠 Houses for Sale (${houses.length})</button>
+    <button class="tab ${_bsTab==='land'?'on':''}" onclick="_bsTab='land';rBuySell('${esc(q)}')">🗺 Land (${land.length})</button>
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Title</th><th class="hm">Area</th><th class="hm">State</th><th>Price</th><th class="hm">By</th><th>Status</th><th class="hm">Expires</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${data.length===0?'<tr><td colspan="8"><div class="empty"><p>No listings in this category</p></div></td></tr>':''}
+      ${data.map(l=>{
+        const pr=D.users.find(u=>u.id===l.poster_id);
+        const state=l.state||_cityStateMap[l.city]||'—';
+        return `<tr>
+          <td><span class="trunc tw_" style="max-width:130px">${esc(l.title||'—')}</span></td>
+          <td class="td_ hm">${esc(l.area||'—')}</td>
+          <td class="hm"><span class="bge bge-gy">${esc(state)}</span></td>
+          <td class="tgr mono">${l.price?fmt(l.price):'—'}</td>
+          <td class="hm">${esc(pr?pr.nick||'+234'+(pr.phone||''):'Unknown')}</td>
+          <td>${lStatus(l,'bs')}</td>
+          <td class="td_ hm">${ds(l.expires_at)}</td>
+          <td><div class="acts">
+            <button class="ab ab-p" onclick="viewListing('${l.id}','bs_listing')">View</button>
+            <button class="ab ab-gr" onclick="boostItem('${l.id}','bs_listing')">Feature</button>
+            <button class="ab ab-r" onclick="delListing('${l.id}','bs_listing')">Del</button>
+          </div></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div></div>`);
+}
+
+// ══════════════════════════
+// HOMIQCONNECT — 3 separate sub-tables
+// ══════════════════════════
+let _cnTab='roommate';
+function rConnect(q=''){
+  const s=(q||'').toLowerCase();
+  const filt=arr=>filterByState(arr).filter(x=>!s||(x.title||'').toLowerCase().includes(s)||(x.area||'').toLowerCase().includes(s)||(x.poster_nick||'').toLowerCase().includes(s));
+  const rooms=filt(D.cn_roommate);
+  const slets=filt(D.cn_shortlet);
+  const shares=filt(D.cn_share);
+  const map={roommate:rooms,shortlet:slets,share:shares};
+  const data=map[_cnTab]||rooms;
+
+  setP(`
+  ${stateBar()}
+  <div class="tb">
+    <div class="tb-l"><div class="ttl">HomiqConnect</div><div class="sub">${rooms.length} roommate · ${slets.length} shortlet · ${shares.length} space share</div></div>
+    <div class="tb-r">
+      <div class="sw"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="si" placeholder="Title, area, user…" value="${esc(q)}" oninput="rConnect(this.value)"/>
+      </div>
+      <button class="btn-s" onclick="loadAll().then(()=>rConnect())"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Refresh</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab ${_cnTab==='roommate'?'on':''}" onclick="_cnTab='roommate';rConnect('${esc(q)}')">🤝 Roommate Needed (${rooms.length})</button>
+    <button class="tab ${_cnTab==='shortlet'?'on':''}" onclick="_cnTab='shortlet';rConnect('${esc(q)}')">🏨 Shortlet Available (${slets.length})</button>
+    <button class="tab ${_cnTab==='share'?'on':''}" onclick="_cnTab='share';rConnect('${esc(q)}')">🏢 Space for Share (${shares.length})</button>
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Post</th><th class="hm">Area</th><th class="hm">State</th><th class="hm">Budget/Price</th><th class="hm">By</th><th>Status</th><th class="hm">Date</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${data.length===0?'<tr><td colspan="8"><div class="empty"><p>No posts in this category</p></div></td></tr>':''}
+      ${data.map(cn=>{
+        const pr=D.users.find(u=>u.id===cn.poster_id);
+        const price=cn.type==='shortlet'?(cn.price_day?fmt(cn.price_day)+'/day':cn.price_month?fmt(cn.price_month)+'/mo':'—'):(cn.budget?fmt(cn.budget):cn.price?fmt(cn.price):'—');
+        const state=cn.state||_cityStateMap[cn.city]||'—';
+        return `<tr>
+          <td>
+            <div class="tw_" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(cn.title||'—')}</div>
+            <div class="mono td_" style="font-size:9px">${(cn.id||'').substring(0,14)}</div>
+          </td>
+          <td class="td_ hm">${esc(cn.area||'—')}</td>
+          <td class="hm"><span class="bge bge-gy">${esc(state)}</span></td>
+          <td class="mono hm" style="color:var(--green)">${price}</td>
+          <td class="hm">${esc(cn.poster_nick||(pr?pr.nick||'+234'+(pr.phone||''):'Unknown'))}</td>
+          <td>${lStatus(cn,'connect')}</td>
+          <td class="td_ hm">${ago(cn.created_at)}</td>
+          <td><div class="acts">
+            <button class="ab ab-p" onclick="viewConnectPost('${cn.id}')">View</button>
+            <button class="ab ab-r" onclick="delConnectPost('${cn.id}')">Del</button>
+          </div></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div></div>`);
+}
+function viewConnectPost(id){
+  const allCn=[...D.cn_roommate,...D.cn_shortlet,...D.cn_share];
+  const cn=allCn.find(x=>x.id===id); if(!cn)return;
+  const pr=D.users.find(u=>u.id===cn.poster_id);
+  oM('Connect Post — '+(cn.type||'post'),`
+    <div class="ir"><span class="ik">ID</span><span class="iv mono td_" style="font-size:10px;word-break:break-all">${cn.id}</span></div>
+    <div class="ir"><span class="ik">Type</span><span class="iv">${cn.type||'—'}</span></div>
+    <div class="ir"><span class="ik">Title</span><span class="iv">${esc(cn.title||'—')}</span></div>
+    <div class="ir"><span class="ik">Area</span><span class="iv">${esc(cn.area||'—')}</span></div>
+    ${cn.budget?`<div class="ir"><span class="ik">Budget</span><span class="iv tgr">${fmt(cn.budget)}</span></div>`:''}
+    ${cn.price_day?`<div class="ir"><span class="ik">Price/Day</span><span class="iv tgr">${fmt(cn.price_day)}</span></div>`:''}
+    <div class="ir"><span class="ik">Posted By</span><span class="iv">${esc(cn.poster_nick||(pr?pr.nick||'+234'+(pr.phone||''):'Unknown'))}</span></div>
+    <div class="ir"><span class="ik">WhatsApp</span><span class="iv">${esc(cn.whatsapp||cn.wa||'—')}</span></div>
+    <div class="ir"><span class="ik">Posted</span><span class="iv">${ds(cn.created_at)}</span></div>
+    ${cn.description||cn.desc?`<div class="sec-lbl">Description</div><div style="font-size:11px;color:var(--ink2);line-height:1.7;background:var(--bg3);border-radius:var(--r);padding:10px 12px;white-space:pre-wrap">${esc(cn.description||cn.desc)}</div>`:''}
+  `,`<button class="mb_ mb-s" onclick="cM()">Close</button>
+     <button class="mb_ mb-d" onclick="delConnectPost('${id}');cM()">Delete</button>`);
+}
+async function delConnectPost(id){
+  if(!confirm('Delete this connect post? Cannot be undone.'))return;
+  const r=await DB.del('tenant_connect',id);
+  if(r){
+    D.cn_roommate=D.cn_roommate.filter(x=>x.id!==id);
+    D.cn_shortlet=D.cn_shortlet.filter(x=>x.id!==id);
+    D.cn_share   =D.cn_share.filter(x=>x.id!==id);
+    toast('Deleted','ok'); refreshBadge(); rConnect();
+  } else toast('Failed','err');
+}
+
+// ══════════════════════════
+// JOBS (only type=job from job_listing)
+// ══════════════════════════
+function rJobs(q=''){
+  const s=q.toLowerCase();
+  const data=filterByState(D.jobs).filter(j=>!s||(j.title||'').toLowerCase().includes(s)||(j.cat||'').includes(s)||(j.area||'').toLowerCase().includes(s));
+  setP(`
+  ${stateBar()}
+  <div class="tb">
+    <div class="tb-l"><div class="ttl">Jobs</div><div class="sub">${data.length} job listings</div></div>
+    <div class="tb-r">
+      <div class="sw"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="si" placeholder="Title, category, area…" value="${esc(q)}" oninput="rJobs(this.value)"/>
+      </div>
+      <button class="btn-s" onclick="loadAll().then(()=>rJobs())"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></button>
+    </div>
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Title</th><th class="hm">Category</th><th class="hm">State</th><th class="hm">Area</th><th class="hm">Salary</th><th class="hm">By</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${data.length===0?'<tr><td colspan="8"><div class="empty"><p>No jobs found</p></div></td></tr>':''}
+      ${data.map(j=>{
+        const pr=D.users.find(u=>u.id===j.poster_id);
+        const state=j.state||_cityStateMap[j.city]||'—';
+        return `<tr>
+          <td><span class="trunc tw_" style="max-width:130px">${esc(j.title||'—')}</span></td>
+          <td class="hm"><span class="bge bge-gy">${esc(j.cat||j.industry||'—')}</span></td>
+          <td class="hm"><span class="bge bge-gy">${esc(state)}</span></td>
+          <td class="td_ hm">${esc(j.area||'—')}</td>
+          <td class="mono hm" style="color:var(--green)">${j.salary?fmt(j.salary):j.pay_type==='negotiable'?'<span class="td_">Negotiable</span>':'—'}</td>
+          <td class="hm">${esc(pr?pr.nick||'+234'+(pr.phone||''):'Unknown')}</td>
+          <td>${lStatus(j,'job')}</td>
+          <td><div class="acts">
+            ${!j.is_top?`<button class="ab ab-gr" onclick="boostItem('${j.id}','job_listing')">Boost</button>`:''}
+            <button class="ab ab-r" onclick="delListing('${j.id}','job_listing')">Del</button>
+          </div></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div></div>`);
+}
+
+// ══════════════════════════
+// HOMIQ SERVICES (svc_listing table)
+// ══════════════════════════
+function rServices(q=''){
+  const s=q.toLowerCase();
+  const data=filterByState(D.services).filter(svc=>!s||(svc.title||svc.cat||'').toLowerCase().includes(s)||(svc.area||'').toLowerCase().includes(s)||(svc.seller_name||'').toLowerCase().includes(s));
+  setP(`
+  ${stateBar()}
+  <div class="tb">
+    <div class="tb-l"><div class="ttl">HomiqServices</div><div class="sub">${data.length} active gigs</div></div>
+    <div class="tb-r">
+      <div class="sw"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="si" placeholder="Title, category, seller…" value="${esc(q)}" oninput="rServices(this.value)"/>
+      </div>
+      <button class="btn-s" onclick="loadAll().then(()=>rServices())"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></button>
+    </div>
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Gig Title</th><th class="hm">Category</th><th class="hm">State</th><th class="hm">Area</th><th class="hm">Price</th><th class="hm">Seller</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${data.length===0?'<tr><td colspan="8"><div class="empty"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg><p>No service gigs found — check svc_listing table in Supabase</p></div></td></tr>':''}
+      ${data.map(svc=>{
+        const pr=D.users.find(u=>u.id===svc.user_id||u.id===svc.poster_id);
+        const state=svc.state||_cityStateMap[svc.city]||'—';
+        const sellerName=svc.seller_name||(pr?pr.nick||'+234'+(pr.phone||''):'Unknown');
+        return `<tr>
+          <td><span class="trunc tw_" style="max-width:130px">${esc(svc.title||svc.cat||'—')}</span></td>
+          <td class="hm"><span class="bge bge-a">${esc(svc.cat||'—')}</span></td>
+          <td class="hm"><span class="bge bge-gy">${esc(state)}</span></td>
+          <td class="td_ hm">${esc(svc.area||svc.city||'—')}</td>
+          <td class="mono hm" style="color:var(--green)">${svc.price?fmt(svc.price):svc.min_price?fmt(svc.min_price)+'+':'—'}</td>
+          <td class="hm">${esc(sellerName)}</td>
+          <td>${lStatus(svc,'svc')}</td>
+          <td><div class="acts">
+            ${!svc.is_pro?`<button class="ab ab-gr" onclick="giveProSvc('${svc.id}')">Pro</button>`:'<span class="bge bge-a">Pro</span>'}
+            <button class="ab ab-r" onclick="delSvc('${svc.id}')">Del</button>
+          </div></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div></div>`);
+}
+async function giveProSvc(id){
+  if(!confirm('Give Verified Pro to this gig for free?'))return;
+  const e=new Date(Date.now()+30*24*3600000).toISOString();
+  const r=await DB.upd('svc_listing',id,{is_pro:true,pro_expires:e});
+  if(r){const s=D.services.find(x=>x.id===id);if(s){s.is_pro=true;s.pro_expires=e;}toast('Verified Pro given','ok');rServices();}
+  else toast('Failed','err');
+}
+async function delSvc(id){
+  if(!confirm('Delete this service gig? Cannot be undone.'))return;
+  const r=await DB.del('svc_listing',id);
+  if(r){D.services=D.services.filter(x=>x.id!==id);toast('Deleted','ok');rServices();}
+  else toast('Failed','err');
+}
+
+// ══════════════════════════
+// SHARED LISTING ACTIONS
+// ══════════════════════════
+function viewListing(id,table){
+  const bsAll=[...D.bs_appliances,...D.bs_houses,...D.bs_land];
+  const src=table==='listing'?D.listings:table==='bs_listing'?bsAll:D.jobs;
+  const l=src.find(x=>x.id===id); if(!l)return;
+  const pr=D.users.find(u=>u.id===l.poster_id);
+  oM('Listing Detail',`
+    <div class="ir"><span class="ik">ID</span><span class="iv mono td_" style="font-size:10px;word-break:break-all">${l.id}</span></div>
+    ${l.area?`<div class="ir"><span class="ik">Area</span><span class="iv">${esc(l.area)}</span></div>`:''}
+    ${l.street?`<div class="ir"><span class="ik">Street</span><span class="iv">${esc(l.street)}</span></div>`:''}
+    ${l.title?`<div class="ir"><span class="ik">Title</span><span class="iv">${esc(l.title)}</span></div>`:''}
+    ${l.cat?`<div class="ir"><span class="ik">Category</span><span class="iv">${esc(l.cat)}</span></div>`:''}
+    ${l.house_type?`<div class="ir"><span class="ik">House Type</span><span class="iv">${esc(l.house_type)}</span></div>`:''}
+    ${l.city?`<div class="ir"><span class="ik">City</span><span class="iv">${esc(l.city)}</span></div>`:''}
+    ${l.state?`<div class="ir"><span class="ik">State</span><span class="iv">${esc(l.state)}</span></div>`:''}
+    ${l.rent?`<div class="ir"><span class="ik">Rent/yr</span><span class="iv tgr">${fmt(l.rent)}</span></div>`:''}
+    ${l.price?`<div class="ir"><span class="ik">Price</span><span class="iv tgr">${fmt(l.price)}</span></div>`:''}
+    ${l.agent_fee!=null?`<div class="ir"><span class="ik">Agent Fee</span><span class="iv">${fmt(l.agent_fee)}</span></div>`:''}
+    ${l.whatsapp||l.wa?`<div class="ir"><span class="ik">WhatsApp</span><span class="iv">${esc(l.whatsapp||l.wa)}</span></div>`:''}
+    <div class="ir"><span class="ik">Reports</span><span class="iv ${(l.report_count||0)>=5?'tr_':''}">${l.report_count||0}</span></div>
+    <div class="ir"><span class="ik">Posted By</span><span class="iv">${esc(pr?pr.nick||'+234'+(pr.phone||''):'Unknown')}</span></div>
+    <div class="ir"><span class="ik">Posted</span><span class="iv">${ds(l.created_at)}</span></div>
+    ${l.expires_at?`<div class="ir"><span class="ik">Expires</span><span class="iv ${new Date(l.expires_at)<new Date()?'tr_':''}">${ds(l.expires_at)}</span></div>`:''}
+    ${l.description||l.desc?`<div class="sec-lbl">Description</div><div style="font-size:11px;color:var(--ink2);line-height:1.7;background:var(--bg3);border-radius:var(--r);padding:10px 12px;white-space:pre-wrap">${esc(l.description||l.desc)}</div>`:''}
+  `,`<button class="mb_ mb-s" onclick="cM()">Close</button>
+     <button class="mb_ mb-d" onclick="delListing('${id}','${table}');cM()">Delete</button>`);
+}
+async function boostItem(id,table){
+  const bsAll=[...D.bs_appliances,...D.bs_houses,...D.bs_land];
+  const src=table==='listing'?D.listings:table==='bs_listing'?bsAll:D.jobs;
+  const item=src.find(x=>x.id===id); if(!item)return;
+  const exp=new Date(Date.now()+48*3600000).toISOString();
+  const upd=table==='bs_listing'?{is_featured:true}:{is_top:true,boost_expires:exp};
+  const r=await DB.upd(table,id,upd);
+  if(r){
+    if(table==='bs_listing')item.is_featured=true; else{item.is_top=true;item.boost_expires=exp;}
+    toast('Boosted!','ok');
+    if(table==='listing')rListings(); else if(table==='bs_listing')rBuySell(); else rJobs();
+  } else toast('Failed','err');
+}
+async function delListing(id,table){
+  if(!confirm('Delete this listing? Cannot be undone.'))return;
+  const r=await DB.del(table,id);
+  if(r){
+    if(table==='listing') D.listings=D.listings.filter(x=>x.id!==id);
+    else if(table==='bs_listing'){
+      D.bs_appliances=D.bs_appliances.filter(x=>x.id!==id);
+      D.bs_houses=D.bs_houses.filter(x=>x.id!==id);
+      D.bs_land=D.bs_land.filter(x=>x.id!==id);
+    } else D.jobs=D.jobs.filter(x=>x.id!==id);
+    toast('Deleted','ok');
+    if(table==='listing')rListings(); else if(table==='bs_listing')rBuySell(); else rJobs();
+  } else toast('Failed to delete','err');
+}
+
+// ══════════════════════════
+// NOTIFICATIONS (send from admin)
+// ══════════════════════════
+function rNotifications(){
+  const notifs=D.notifications;
+  setP(`
+  <div class="tb">
+    <div class="tb-l"><div class="ttl">Notifications</div><div class="sub">Send announcements & alerts to users</div></div>
+    <button class="btn-s ab-p" onclick="openSendNotifModal()" style="background:var(--gold);border-color:var(--gold);color:#fff">
+      <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Send Notification
+    </button>
+  </div>
+
+  <div class="sg" style="grid-template-columns:repeat(3,1fr)">
+    <div class="sc"><div class="sc-top"><span class="sc-lbl">Total Sent</span></div><div class="sc-val">${notifs.length}</div></div>
+    <div class="sc"><div class="sc-top"><span class="sc-lbl">Broadcasts</span></div><div class="sc-val tg">${notifs.filter(n=>!n.user_id).length}</div></div>
+    <div class="sc"><div class="sc-top"><span class="sc-lbl">Targeted</span></div><div class="sc-val" style="color:var(--blue)">${notifs.filter(n=>n.user_id).length}</div></div>
+  </div>
+
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Title</th><th>Type</th><th class="hm">Target</th><th class="hm">State</th><th class="hm">Sent</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${notifs.length===0?'<tr><td colspan="6"><div class="empty"><p>No notifications sent yet</p></div></td></tr>':''}
+      ${notifs.map(n=>`<tr>
+        <td>
+          <div class="tw_" style="font-size:12px">${esc(n.title||'—')}</div>
+          <div class="td_" style="font-size:10px">${esc((n.body||'').substring(0,60))}${(n.body||'').length>60?'…':''}</div>
+        </td>
+        <td><span class="bge ${n.type==='announcement'?'bge-g':n.type==='listing'?'bge-gr':n.type==='job'?'bge-b':'bge-a'}">${esc(n.type||'—')}</span></td>
+        <td class="hm">${n.user_id?'<span class="bge bge-b">Targeted</span>':'<span class="bge bge-gy">All Users</span>'}</td>
+        <td class="hm">${esc(n.city||'All States')}</td>
+        <td class="td_ hm">${ago(n.created_at)}</td>
+        <td><div class="acts">
+          <button class="ab ab-r" onclick="delNotif('${n.id}')">Del</button>
+        </div></td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div></div>`);
+}
+
+function openSendNotifModal(){
+  oM('Send Notification',`
+    <p style="font-size:11px;color:var(--ink3);margin-bottom:14px;line-height:1.6">Broadcast to all users or target a specific state. Appears instantly in the user's notification bell.</p>
+    <div class="mf">
+      <label class="ml_">Notification Type</label>
+      <select class="mi_" id="n-type">
+        <option value="announcement">📢 Announcement</option>
+        <option value="listing">🏠 New Listings Alert</option>
+        <option value="job">💼 Jobs Alert</option>
+        <option value="buysell">🛒 Buy/Sell Alert</option>
+        <option value="connect">🤝 Connect Alert</option>
+      </select>
+    </div>
+    <div class="mf">
+      <label class="ml_">Target State (leave All States for broadcast)</label>
+      <select class="mi_" id="n-state">
+        <option value="">All States (Broadcast)</option>
+        ${STATES.map(s=>`<option value="${s.key}">${s.label}</option>`).join('')}
+      </select>
+    </div>
+    <div class="mf">
+      <label class="ml_">Title *</label>
+      <input class="mi_" id="n-title" type="text" placeholder="e.g. New houses available in Akure!" maxlength="80"/>
+    </div>
+    <div class="mf">
+      <label class="ml_">Message Body *</label>
+      <textarea class="mi_" id="n-body" rows="3" placeholder="Write your message here…" maxlength="300" style="resize:vertical"></textarea>
+    </div>
+    <div class="mf">
+      <label class="ml_">Action Label (optional button text)</label>
+      <input class="mi_" id="n-action-label" type="text" placeholder="e.g. Browse Listings" maxlength="30"/>
+    </div>
+    <div class="mf">
+      <label class="ml_">Action URL (optional — page name like "listings" or "jobs")</label>
+      <input class="mi_" id="n-action-url" type="text" placeholder="e.g. page:listings" maxlength="100"/>
+    </div>
+  `,`<button class="mb_ mb-s" onclick="cM()">Cancel</button>
+     <button class="mb_ mb-p" onclick="sendNotification()">Send Now →</button>`);
+}
+
+async function sendNotification(){
+  const type  = document.getElementById('n-type')?.value;
+  const state = document.getElementById('n-state')?.value;
+  const title = document.getElementById('n-title')?.value.trim();
+  const body  = document.getElementById('n-body')?.value.trim();
+  const actionLabel = document.getElementById('n-action-label')?.value.trim();
+  const actionUrl   = document.getElementById('n-action-url')?.value.trim();
+
+  if(!title){toast('Title is required','err');return;}
+  if(!body){toast('Message body is required','err');return;}
+
+  const notif = {
+    id: 'notif_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+    type,
+    title,
+    body,
+    user_id: null, // null = broadcast to all
+    city: state||null,
+    action_label: actionLabel||null,
+    action_url: actionUrl||null,
+    read_by: [],
+    created_at: new Date().toISOString(),
+  };
+
+  const r = await DB.ins('notifications', notif);
+  if(r){
+    D.notifications.unshift(Array.isArray(r)?r[0]:r);
+    toast('✓ Notification sent to '+(state?STATES.find(s=>s.key===state)?.label:'All States'),'ok');
+    cM(); rNotifications();
+  } else {
+    toast('Failed to send — check Supabase notifications table exists','err');
+  }
+}
+
+async function delNotif(id){
+  if(!confirm('Delete this notification? Users who haven\'t read it won\'t see it.'))return;
+  const r=await DB.del('notifications',id);
+  if(r){D.notifications=D.notifications.filter(x=>x.id!==id);toast('Deleted','ok');rNotifications();}
+  else toast('Failed','err');
+}
+
+// ══════════════════════════
+// PAYMENTS
+// ══════════════════════════
+function rPayments(q=''){
+  const s=q.toLowerCase();
+  const data=s?D.payments.filter(p=>{
+    const u=D.users.find(x=>x.id===p.user_id);
+    return (u&&((u.nick||'').toLowerCase().includes(s)||(u.phone||'').includes(s)||(u.email||'').toLowerCase().includes(s)))
+        ||(p.type||'').includes(s)||(p.ref||'').toLowerCase().includes(s);
+  }):D.payments;
+  const total=data.reduce((s,p)=>s+(p.amount||0),0)/100;
+  setP(`
+  <div class="tb">
+    <div class="tb-l"><div class="ttl">Payments</div><div class="sub">${data.length} transactions · total <span class="tgr">${fmt(total)}</span></div></div>
+    <div class="tb-r">
+      <div class="sw"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="si" placeholder="User, type, reference…" value="${esc(q)}" oninput="rPayments(this.value)"/>
+      </div>
+      <button class="btn-s" onclick="loadAll().then(()=>rPayments())"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></button>
+    </div>
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>User</th><th>Type</th><th>Amount</th><th class="hm">Reference</th><th class="hm">Date</th><th>Action</th></tr></thead>
+    <tbody>
+      ${data.length===0?'<tr><td colspan="6"><div class="empty"><p>No payments</p></div></td></tr>':''}
+      ${data.map(p=>{
+        const u=D.users.find(x=>x.id===p.user_id);
+        return `<tr>
+          <td><div class="tw_" style="font-size:12px">${esc(u?u.nick||'+234'+(u.phone||''):'Unknown')}</div><div class="mono td_" style="font-size:9px">${(p.user_id||'').substring(0,14)}</div></td>
+          <td><span class="bge bge-g">${esc((p.type||'—').replace(/_/g,' '))}</span></td>
+          <td class="tgr mono">${fmt((p.amount||0)/100)}</td>
+          <td class="mono td_ hm"><span class="trunc" style="max-width:160px">${esc(p.ref||'—')}</span></td>
+          <td class="td_ hm">${ds(p.created_at)}</td>
+          <td><button class="ab ab-gr" onclick="fixPayModal('${p.user_id}','${p.id}','${p.type}','${p.amount}')">Fix</button></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div></div>`);
+}
+function fixPayModal(uid,payId,type,amount){
+  const u=D.users.find(x=>x.id===uid);
+  oM('Fix Payment',`
+    <p style="font-size:11px;color:var(--ink2);line-height:1.6;margin-bottom:14px">
+      ${u?'User <strong>'+esc(u.nick||'+234'+(u.phone||''))+'</strong>':'Unknown user'}${type?' paid for <strong>'+esc((type||'').replace(/_/g,' '))+'</strong> ('+fmt((amount||0)/100)+') but may not have received it.':' — manually apply a benefit.'}
+    </p>
+    <div class="mf"><label class="ml_">What to apply</label>
+      <select class="mi_" id="fix-sel">
+        <option value="agent">Give Verified Agent (30 days)</option>
+        <option value="store_gadget">Give Verified Store — Gadget</option>
+        <option value="store_electronics">Give Verified Store — Electronics</option>
+        <option value="pro">Give Verified Pro</option>
+        <option value="boost">Boost their latest rent listing</option>
+      </select>
+    </div>
+    <p style="font-size:10px;color:var(--ink4)">Applies immediately to the user account.</p>
+  `,`<button class="mb_ mb-s" onclick="cM()">Cancel</button>
+     <button class="mb_ mb-p" onclick="applyFix('${uid}')">Apply Fix</button>`);
+}
+async function applyFix(uid){
+  const sel=document.getElementById('fix-sel'); if(!sel)return;
+  const t=sel.value, u=D.users.find(x=>x.id===uid); if(!u)return;
+  const e30=new Date(Date.now()+30*24*3600000).toISOString();
+  let upd={};
+  if(t==='agent') upd={is_agent:true,role:'agent',agent_expires:e30};
+  else if(t==='store_gadget') upd={store_type:'gadget',store_expires:e30};
+  else if(t==='store_electronics') upd={store_type:'electronics',store_expires:e30};
+  else if(t==='pro') upd={has_svc_listing:true};
+  else if(t==='boost'){
+    const l=D.listings.find(x=>x.poster_id===uid&&!x.is_top);
+    if(l){await DB.upd('listing',l.id,{is_top:true,boost_expires:new Date(Date.now()+48*3600000).toISOString()});l.is_top=true;}
+    else{toast('No unboosted listing found','err');return;}
+  }
+  if(Object.keys(upd).length){
+    const r=await DB.upd('user',uid,upd);
+    if(!r){toast('Failed','err');return;}
+    Object.assign(u,upd);
+  }
+  toast('Fix applied to '+esc(u.nick||u.phone||'user'),'ok');
+  cM(); rPayments();
+}
+
+// ══════════════════════════
+// REPORTS
+// ══════════════════════════
+let _rt='open';
+function rReports(){
+  const open=D.reports.filter(r=>!r.resolved);
+  const done=D.reports.filter(r=>r.resolved);
+  setP(`
+  <div class="tb">
+    <div class="tb-l"><div class="ttl">Reports</div><div class="sub">${open.length} open · ${done.length} resolved</div></div>
+    <button class="btn-s" onclick="loadAll().then(()=>rReports())"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Refresh</button>
+  </div>
+  <div class="tabs">
+    <button class="tab ${_rt==='open'?'on':''}" onclick="_rt='open';drawRepTable()">Open (${open.length})</button>
+    <button class="tab ${_rt==='done'?'on':''}" onclick="_rt='done';drawRepTable()">Resolved (${done.length})</button>
+  </div>
+  <div id="rt"></div>`);
+  drawRepTable();
+}
+function drawRepTable(){
+  document.querySelectorAll('.tab').forEach((t,i)=>{t.classList.toggle('on',(i===0&&_rt==='open')||(i===1&&_rt==='done'));});
+  const bsAll=[...D.bs_appliances,...D.bs_houses,...D.bs_land];
+  const data=_rt==='open'?D.reports.filter(r=>!r.resolved):D.reports.filter(r=>r.resolved);
+  const el=document.getElementById('rt'); if(!el)return;
+  if(!data.length){el.innerHTML='<div class="empty"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><p>Nothing here</p></div>';return;}
+  el.innerHTML=`<div class="card"><div class="tw"><table>
+    <thead><tr><th>Listing</th><th>Report Type</th><th class="hm">Reporter</th><th class="hm">Date</th><th>Actions</th></tr></thead>
+    <tbody>
+    ${data.map(r=>{
+      const l=[...D.listings,...bsAll,...D.jobs].find(x=>x.id===r.listing_id);
+      const rep=D.users.find(u=>u.id===r.reporter_id);
+      const tbl=D.listings.find(x=>x.id===r.listing_id)?'listing':bsAll.find(x=>x.id===r.listing_id)?'bs_listing':'job_listing';
+      return`<tr>
+        <td>
+          <div class="tw_" style="font-size:12px">${l?esc(l.area||l.title||'Listing'):'Deleted'}</div>
+          <div class="mono td_" style="font-size:9px">${(r.listing_id||'').substring(0,18)}</div>
+        </td>
+        <td><span class="bge bge-r">${esc(r.report_type||'—')}</span></td>
+        <td class="hm">${esc(rep?rep.nick||'+234'+(rep.phone||''):'Anonymous')}</td>
+        <td class="td_ hm">${ago(r.created_at)}</td>
+        <td><div class="acts">
+          ${!r.resolved?`<button class="ab ab-gr" onclick="resolveRep('${r.id}')">Resolve</button>`:'<span class="td_" style="font-size:10px">✓</span>'}
+          ${l?`<button class="ab ab-r" onclick="delListing('${l.id}','${tbl}')">Del Post</button>`:''}
+        </div></td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div></div>`;
+}
+async function resolveRep(id){
+  const rep=D.reports.find(y=>String(y.id)===String(id));
+  if(!rep){toast('Report not found','err');return;}
+  const r=await DB.upd('report',id,{resolved:true,resolved_at:new Date().toISOString()});
+  if(r){rep.resolved=true;rep.resolved_at=new Date().toISOString();refreshBadge();toast('✓ Resolved','ok');rReports();}
+  else toast('Failed to resolve — check Supabase RLS','err');
+}
+
+// ══════════════════════════
+// REFERRALS
+// ══════════════════════════
+let _refFilter='all', _refSearch='';
+function rReferrals(){
+  const earners=D.users.filter(u=>(u.referral_count||0)>0||(u.referral_earnings||0)>0);
+  const totalCredited=D.referrals.reduce((s,r)=>s+(r.amount||0),0);
+  const totalRedeemed=D.referrals.filter(r=>r.redeemed).reduce((s,r)=>s+(r.amount||0),0);
+  const pendingPay=totalCredited-totalRedeemed;
+  const readyUsers=D.users.filter(u=>(u.referral_earnings||0)>=3000).length;
+  let data=D.users.filter(u=>(u.referral_count||0)>0||(u.referral_earnings||0)>0);
+  if(_refSearch) data=data.filter(u=>(u.nick||'').toLowerCase().includes(_refSearch)||(u.email||'').toLowerCase().includes(_refSearch)||(u.phone||'').includes(_refSearch));
+  if(_refFilter==='ready') data=data.filter(u=>(u.referral_earnings||0)>=3000);
+  if(_refFilter==='earning') data=data.filter(u=>(u.referral_earnings||0)>0&&(u.referral_earnings||0)<3000);
+
+  setP(`
+  <div class="tb">
+    <div class="tb-l"><div class="ttl">Referral Management</div><div class="sub">Monitor and redeem user referral earnings</div></div>
+    <div class="tb-r">
+      <div class="sw"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="si" placeholder="Search user…" value="${esc(_refSearch)}" oninput="_refSearch=this.value;rReferrals()"/>
+      </div>
+      <button class="btn-s" onclick="loadAll().then(rReferrals)"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Refresh</button>
+    </div>
+  </div>
+  <div class="sg" style="grid-template-columns:repeat(4,1fr)">
+    <div class="sc"><div class="sc-top"><span class="sc-lbl">Total Credited</span></div><div class="sc-val tgr">${fmt(totalCredited)}</div><div class="sc-sub">${D.referrals.length} conversions</div></div>
+    <div class="sc"><div class="sc-top"><span class="sc-lbl">Total Redeemed</span></div><div class="sc-val">${fmt(totalRedeemed)}</div><div class="sc-sub">paid out</div></div>
+    <div class="sc"><div class="sc-top"><span class="sc-lbl">Pending Payout</span></div><div class="sc-val" style="color:var(--amber)">${fmt(pendingPay)}</div><div class="sc-sub">owed to users</div></div>
+    <div class="sc"><div class="sc-top"><span class="sc-lbl">Ready to Redeem</span></div><div class="sc-val tr_">${readyUsers}</div><div class="sc-sub">users at ₦3k+</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab ${_refFilter==='all'?'on':''}" onclick="_refFilter='all';rReferrals()">All Earners (${earners.length})</button>
+    <button class="tab ${_refFilter==='ready'?'on':''}" onclick="_refFilter='ready';rReferrals()">Ready to Redeem (${readyUsers})</button>
+    <button class="tab ${_refFilter==='earning'?'on':''}" onclick="_refFilter='earning';rReferrals()">Still Earning</button>
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>User</th><th>Contact</th><th>Referrals</th><th>Balance</th><th>Redeemed</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${data.length===0?'<tr><td colspan="6"><div class="empty"><p>No referral earners yet</p></div></td></tr>':''}
+      ${data.map(u=>{
+        const bal=u.referral_earnings||0;
+        const refs=D.referrals.filter(r=>r.referrer_id===u.id);
+        const redeemedAmt=refs.filter(r=>r.redeemed).reduce((s,r)=>s+(r.amount||0),0);
+        return `<tr>
+          <td><div class="tw_">${esc(u.nick||'—')}</div><div class="mono td_" style="font-size:9px">${(u.referral_code||u.id.slice(0,8)).toUpperCase()}</div></td>
+          <td class="td_" style="font-size:11px">${esc(u.email||'+234'+(u.phone||'—'))}</td>
+          <td><span class="bge bge-b">${u.referral_count||0}</span></td>
+          <td><span class="mono tw_" style="color:${bal>=3000?'var(--amber)':bal>0?'var(--green)':'var(--ink3)'}">${fmt(bal)}</span></td>
+          <td class="td_">${redeemedAmt>0?fmt(redeemedAmt):'—'}</td>
+          <td><div class="acts"><button class="ab" onclick="openUserReferrals('${u.id}')">Manage</button></div></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div></div>`);
+}
+function openUserReferrals(uid){
+  const u=D.users.find(x=>x.id===uid); if(!u)return;
+  const refs=D.referrals.filter(r=>r.referrer_id===uid);
+  const bal=u.referral_earnings||0;
+  const totalRedeemed=refs.filter(r=>r.redeemed).reduce((s,r)=>s+(r.amount||0),0);
+  function renderRefRows(){
+    return refs.length===0?'<div class="td_" style="font-size:11px;padding:12px 0">No referral earnings yet.</div>':
+      refs.map((r)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:${r.redeemed?'var(--bg3)':'var(--bg4)'};border-radius:var(--r);margin-bottom:6px;border:1px solid var(--br)">
+        <div><div style="font-size:12px;font-weight:700;color:${r.redeemed?'var(--ink3)':'var(--ink)'}">${esc(r.referred_nick||'A user')}</div>
+          <div style="font-size:10px;color:var(--ink3);margin-top:2px">Became agent · ${ago(r.created_at)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-family:'DM Mono',monospace;font-weight:700;color:${r.redeemed?'var(--ink3)':'var(--green)'}">+${fmt(r.amount||1000)}</span>
+          ${r.redeemed?`<span class="bge bge-gy">Redeemed ${r.redeemed_at?ds(r.redeemed_at):''}</span>`:
+            `<button class="ab ab-gr" onclick="redeemSingle('${uid}','${r.id}',${r.amount||1000})">Redeem</button>`}
+        </div>
+      </div>`).join('');
+  }
+  oM('Referrals — '+esc(u.nick||u.email||'User'),`
+    <div class="ph"><div class="pav">${(u.nick||'?').charAt(0).toUpperCase()}</div>
+      <div><div class="pn">${esc(u.nick||'—')}</div><div class="pc">${esc(u.email||'+234'+(u.phone||'—'))}</div>
+        <div class="pbadges" style="margin-top:6px">
+          <span class="bge bge-gr">Balance: ${fmt(bal)}</span>
+          <span class="bge bge-gy">Redeemed: ${fmt(totalRedeemed)}</span>
+          ${bal>=3000?'<span class="bge bge-a">⚡ Redeem Ready</span>':''}
+        </div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--ink3);margin-bottom:10px">Click <strong>Redeem</strong> on individual referrals below after manually paying the user. Their balance reduces accordingly.</div>
+    <div id="ref-rows-${uid}">${renderRefRows()}</div>
+  `,`<button class="mb_ mb-p" onclick="cM()">Done</button>`);
+}
+async function redeemSingle(uid,refId,amount){
+  const u=D.users.find(x=>x.id===uid);
+  const ref=D.referrals.find(r=>r.id==refId);
+  if(!u||!ref)return;
+  const r=await DB.upd('referral_earning',refId,{redeemed:true,redeemed_at:new Date().toISOString()});
+  if(!r){toast('Failed to update — try again','err');return;}
+  const newBal=Math.max(0,(u.referral_earnings||0)-amount);
+  await DB.upd('user',uid,{referral_earnings:newBal});
+  ref.redeemed=true; ref.redeemed_at=new Date().toISOString(); u.referral_earnings=newBal;
+  toast('✓ Redeemed '+fmt(amount)+' from '+esc(u.nick||'user')+' · Balance: '+fmt(newBal),'ok');
+  const rowEl=document.getElementById('ref-rows-'+uid);
+  if(rowEl){
+    const refs2=D.referrals.filter(r=>r.referrer_id===uid);
+    rowEl.innerHTML=refs2.length===0?'<div class="td_" style="font-size:11px;padding:12px 0">No referral earnings yet.</div>':
+      refs2.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:${r.redeemed?'var(--bg3)':'var(--bg4)'};border-radius:var(--r);margin-bottom:6px;border:1px solid var(--br)">
+        <div><div style="font-size:12px;font-weight:700;color:${r.redeemed?'var(--ink3)':'var(--ink)'}">${esc(r.referred_nick||'A user')}</div>
+          <div style="font-size:10px;color:var(--ink3);margin-top:2px">Became agent · ${ago(r.created_at)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-family:'DM Mono',monospace;font-weight:700;color:${r.redeemed?'var(--ink3)':'var(--green)'}">+${fmt(r.amount||1000)}</span>
+          ${r.redeemed?`<span class="bge bge-gy">Redeemed ${r.redeemed_at?ds(r.redeemed_at):''}</span>`:
+            `<button class="ab ab-gr" onclick="redeemSingle('${uid}','${r.id}',${r.amount||1000})">Redeem</button>`}
+        </div>
+      </div>`).join('');
+    document.querySelectorAll('.pbadges .bge-gr').forEach(el=>{if(el.textContent.startsWith('Balance'))el.textContent='Balance: '+fmt(newBal);});
+    document.querySelectorAll('.pbadges .bge-gy').forEach(el=>{if(el.textContent.startsWith('Redeemed'))el.textContent='Redeemed: '+fmt(D.referrals.filter(r=>r.referrer_id===uid&&r.redeemed).reduce((s,r)=>s+(r.amount||0),0));});
+  }
+  refreshBadge();
+}
+
+</script>
+</body>
+</html>
